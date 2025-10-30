@@ -6,10 +6,10 @@ __pycache__/
 *.json
 *.csv
 *.log
-test*
+test_*
 data/
 .env
-
+ca.crt
 pgdata/
 
 load_telegram_users_to_redis.py
