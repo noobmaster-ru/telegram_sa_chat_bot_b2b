@@ -1,0 +1,12 @@
+import re
+
+class StringConverterClass:
+    @staticmethod
+    def escape_markdown_v2(text: str) -> str:
+        escape_chars = r"_*[]()~`>#+-=|{}.!\\"
+        return re.sub(f"([{re.escape(escape_chars)}])", r"\\\1", text)
+    
+    @staticmethod
+    def extract_table_id(url: str) -> str | None:
+        match = re.search(r"/spreadsheets/d/([a-zA-Z0-9-_]+)", url)
+        return match.group(1) if match else None

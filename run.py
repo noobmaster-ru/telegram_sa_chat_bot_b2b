@@ -1,14 +1,11 @@
 import os 
 import asyncio
-import asyncpg
-import datetime
-
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher
 
 from src.bot.handlers import message_router
 
-from src.db.database import on_shutdown, on_startup
+from src.db.base import on_shutdown, on_startup
         
 async def main():
     load_dotenv()
