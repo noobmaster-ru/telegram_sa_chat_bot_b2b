@@ -11,8 +11,6 @@ from src.bot.states.user import UserState
 from src.services.string_converter import StringConverterClass
 from src.db.models import TableORM
 
-import asyncio
-
 router = Router()
 
 @router.message(StateFilter(UserState.google_sheet_handler))
@@ -59,10 +57,10 @@ async def callback_google_sheets_url(
             photo_path4 = INSTRUCTION_PHOTOS_DIR / "4_placa_tables_service_account.png"
 
             caption_text = (
-                f"Теперь *_внимательно_*:\n\n"
+                f"Теперь *внимательно!*:\n\n"
                 f"1. Откройте свою таблицу\n"
                 f"2. В правом верхнем углу откройте настройки доступа *(фото1)*\n"
-                f"3. В поисковой строке вбейте вот этот email *(фото2)*:\n*{service_account}*\n\n"
+                f"3. В поисковой строке вбейте вот этот email *(фото2)*:\n\n*{service_account}*\n\n"
                 f"4. Дайте доступ *Редактор* этому сервисному аккаунту Google *(фото3)*\n\n"
                 f"Как сделаете, у вас должно получиться вот так, как на *(фото4)*"
             )

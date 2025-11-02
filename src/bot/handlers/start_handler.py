@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import Router
 from aiogram.filters import CommandStart
 from aiogram.types import Message
@@ -27,7 +29,7 @@ async def cmd_start(
         existing_user = result.scalar_one_or_none()
 
         if existing_user:
-            print(f"user {telegram_id} already in 'users'")
+            logging.info(f"user {telegram_id} already in 'users'")
         else:
             # Создаём нового пользователя
             new_user = UserORM(
@@ -37,7 +39,7 @@ async def cmd_start(
             )
             session.add(new_user)
             await session.commit()
-            print(f"added {telegram_id} into 'users'")
+            logging.info(f"added {telegram_id} into 'users'")
 
     await message.answer("Здравствуйте! Пришлите,пожалуйста, свой токен от личного кабинета 😊")
     await state.set_state(UserState.token_handler)

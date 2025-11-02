@@ -1,0 +1,11 @@
+services:
+  telegram-bot:
+    build: .
+    container_name: telegram-ai-agent-b2b
+    command: python run.py
+    env_file: 
+      - .env
+    volumes:
+      - .:/app
+      - ./logs:/app/logs
+    restart: always

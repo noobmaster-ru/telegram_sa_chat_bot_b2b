@@ -1,11 +1,23 @@
 import os 
 import asyncio
+import logging
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher
 from src.bot.handlers import *
 
 from src.db.base import on_shutdown, on_startup
+   
         
+# Настраиваем логирование
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler(f"logs/bot.log", encoding="utf-8"),  # сохраняем в файл
+        logging.StreamHandler(),  # выводим в консоль
+    ],
+)
+
 async def main():
     load_dotenv()
     TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN_STR")
