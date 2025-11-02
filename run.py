@@ -12,7 +12,7 @@ from src.bot.handlers import (
 )
 
 from src.db.base import on_shutdown, on_startup
-   
+from src.services.gemini_api import GeminiVertexClient
         
 # Настраиваем логирование
 logging.basicConfig(
@@ -30,6 +30,13 @@ async def main():
     GOOGLE_SHEETS_TEMPLATE_URL = os.getenv("GOOGLE_SHEETS_TEMPLATE_URL")
     SERVICE_ACCOUNT = os.getenv("SERVICE_ACCOUNT")
 
+
+    GEMINI_PROJECT_ID = os.getenv("GEMINI_PROJECT_ID")
+    GEMINI_MODEL_NAME=os.getenv("GEMINI_MODEL_NAME")
+    gemini_client = GeminiVertexClient(
+        model_name=GEMINI_MODEL_NAME,
+        project_id=GEMINI_PROJECT_ID,
+    )
     
     bot = Bot(token=TG_BOT_TOKEN)
     dp = Dispatcher()
@@ -40,7 +47,8 @@ async def main():
     
     dp.workflow_data.update({
         "google_sheet_template_url": GOOGLE_SHEETS_TEMPLATE_URL,
-        "service_account": SERVICE_ACCOUNT
+        "service_account": SERVICE_ACCOUNT,
+        "gemini_client": gemini_client
     })
     dp.include_routers(start_router, token_router, google_sheet_router, service_account_router, result_json_router)
     await dp.start_polling(bot)
