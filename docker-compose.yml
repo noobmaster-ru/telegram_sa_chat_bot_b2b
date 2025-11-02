@@ -6,6 +6,5 @@ services:
     env_file: 
       - .env
     volumes:
-      - .:/app
-      - ./logs:/app/logs
+      - ./logs:/logs
     restart: always

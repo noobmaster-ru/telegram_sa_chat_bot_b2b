@@ -5,4 +5,5 @@ class UserState(StatesGroup):
     google_sheet_handler = State()
     
     service_account_handler = State()
-    data_export_telegram = State()
+    result_json = State()
+    parsing_data = State()

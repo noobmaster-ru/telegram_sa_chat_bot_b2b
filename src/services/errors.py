@@ -1,0 +1,2 @@
+class WrongTableLinkError(Exception):
+    pass

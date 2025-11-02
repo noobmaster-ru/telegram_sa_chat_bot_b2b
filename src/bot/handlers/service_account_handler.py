@@ -12,7 +12,7 @@ from src.services.string_converter import StringConverterClass
 router = Router()
 
 @router.message(StateFilter(UserState.service_account_handler))
-async def handle_google_sheets_url(message: Message):
+async def handle_service_account(message: Message):
     await message.reply(
         f"Дали доступ *Редактор* нашему cервисному аккаунту Google?",
         reply_markup=get_yes_no_keyboard("service_account"),
@@ -20,7 +20,7 @@ async def handle_google_sheets_url(message: Message):
     )
 
 @router.callback_query(F.data.startswith("service_account_"), StateFilter(UserState.service_account_handler))
-async def callback_google_sheets_url(
+async def callback_service_account(
     callback: CallbackQuery,
     state: FSMContext,
     db_session_factory: async_sessionmaker,
@@ -32,7 +32,7 @@ async def callback_google_sheets_url(
         # тут можно добавить запись в бд
         await callback.message.edit_text("Отлично!")
         await callback.message.answer("Теперь пришлите файл со всеми вашими переписками с покупателями.")
-        caption_text = f"Для этого необходимо:\n1. Cкачать Desktop версию Telegram\n\nhttps://desktop.telegram.org/\n\n2. Зайти в настройки *(settings)* ,затем расширенные настройки *(advanced)*, промотать в самый низ и зайти в раздел *Export Telegram Data*.\n3. Далее нажать галочки на *Personal chats* , *Machine-readable JSON*.\n4. Скачать себе на компьютер в удобную директорию\n5. Прислать мне сюда файл *result.json*\n\n\n(Следуйте указателям на фотографиях)"
+        caption_text = f"Для этого необходимо:\n1. Cкачать Desktop версию Telegram\n\nhttps://desktop.telegram.org/\n\n2. Зайти в настройки *(settings)* ,затем расширенные настройки *(advanced)*, промотать в самый низ и зайти в раздел *Export Telegram Data*.\n3. Далее нажать галочки на *Personal chats* , *Machine-readable JSON*.\n4. Скачать себе на компьютер в удобную директорию\n5. Прислать мне сюда файл *result.json*\n\n\n(Следуйте указателям на фотографиях, скачивание данных может занять несколько десятков минут)"
         safe_caption = StringConverterClass.escape_markdown_v2(caption_text) 
         
         INSTRUCTION_PHOTOS_DIR = Path(__file__).resolve().parent.parent.parent / "resources"
@@ -71,7 +71,7 @@ async def callback_google_sheets_url(
             text=safe_question,
             parse_mode="MarkdownV2"
         )
-        await state.set_state(UserState.data_export_telegram)
+        await state.set_state(UserState.result_json)
     else:
         await state.clear()
         try:

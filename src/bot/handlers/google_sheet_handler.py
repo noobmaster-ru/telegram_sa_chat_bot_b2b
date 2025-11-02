@@ -1,3 +1,5 @@
+import logging
+import asyncio
 from pathlib import Path
 from aiogram import Router, F
 from aiogram.filters import StateFilter
@@ -10,12 +12,14 @@ from src.bot.keyboards.yes_no_keyboard import get_yes_no_keyboard
 from src.bot.states.user import UserState
 from src.services.string_converter import StringConverterClass
 from src.db.models import TableORM
+from src.services.errors import WrongTableLinkError
 
 router = Router()
 
 @router.message(StateFilter(UserState.google_sheet_handler))
 async def handle_google_sheets_url(message: Message, state: FSMContext):
     table_url = message.text
+    logging.info(table_url)
     await state.update_data(table_url=table_url)
     await message.reply(
         f"{table_url}\n\nЭто ссылка на вашу гугл-таблицу?",
@@ -35,12 +39,10 @@ async def callback_google_sheets_url(
 
     if answer == "yes":
         try:
-            table_id = StringConverterClass.extract_table_id(table_url)
             if not table_url.startswith("https://"):
-                await callback.message.edit_text("Пришлите ссылку корректно, пожалуйста.")
-                await state.set_state(UserState.google_sheet_handler)
-                return
+                raise WrongTableLinkError(f"Неверный формат ссылки на таблицу: {table_url}")     
             
+            table_id = StringConverterClass.extract_table_id(table_url)
             async with db_session_factory() as session:
                 stmt = insert(TableORM).values(
                     table_id=table_id,
@@ -48,8 +50,11 @@ async def callback_google_sheets_url(
                 )
                 await session.execute(stmt)
                 await session.commit()
+            
             await callback.message.edit_text("✅ Ссылка на таблицу записана!")
+            await asyncio.sleep(0.5)
             await callback.message.answer("Отлично!")
+            await asyncio.sleep(0.5)
             INSTRUCTION_PHOTOS_DIR = Path(__file__).resolve().parent.parent.parent / "resources"
             photo_path1 = INSTRUCTION_PHOTOS_DIR / "1_access_settings.png"
             photo_path2 = INSTRUCTION_PHOTOS_DIR / "2_search_bar.png"
@@ -67,8 +72,8 @@ async def callback_google_sheets_url(
             safe_caption = StringConverterClass.escape_markdown_v2(caption_text) 
             media_group = [
                 InputMediaPhoto(
-                    media=FSInputFile(photo_path1), 
-                    caption=safe_caption, 
+                    media=FSInputFile(photo_path1),
+                    caption=safe_caption,
                     parse_mode="MarkdownV2"
                 ),
                 InputMediaPhoto(media=FSInputFile(photo_path2)), 
@@ -86,9 +91,13 @@ async def callback_google_sheets_url(
                 parse_mode="MarkdownV2"
             )
             await state.set_state(UserState.service_account_handler)
-        except Exception:
-            await callback.message.edit_text("Пришлите ссылку корректно, пожалуйста.")
+        except WrongTableLinkError as e:
+            await callback.message.edit_text(
+                f"Ошибка:\n\n{e}\n\nПришлите ссылку корректно, пожалуйста."
+            )
             await state.set_state(UserState.google_sheet_handler)
+        # except Exception as e:
+        #     await callback.message.answer(f"Ошибка в отправке инструкции: {e}")
     else:
         await state.clear()
         await callback.message.edit_text("Пришлите тогда ссылку на таблицу ещё раз.")
