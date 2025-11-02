@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from src.bot.keyboards.yes_no_keyboard import get_yes_no_keyboard
 from src.bot.states.user import UserState
 
-from src.services.parse_telegram_data import parse_telegram_export
+from src.services.parsing_data import ParsingDataClass
 
 router = Router()
 
@@ -20,7 +20,7 @@ router = Router()
 async def handle_result_json(message: Message):
     await message.reply("Начинаю парсинг, подождите, пожалуйста")
     document = message.document
-
+    telegram_id = message.from_user.id
     if not document.file_name.endswith(".json"):
         await message.answer("Пожалуйста, отправь файл в формате .json 😊")
         return
@@ -36,7 +36,7 @@ async def handle_result_json(message: Message):
         await f.write(file_bytes.getvalue())
 
     # Парсим JSON
-    parsed_path = parse_telegram_export(temp_path)
+    parsed_path = await ParsingDataClass.parse_telegram_export_async(temp_path, telegram_id)
     parsed_file = FSInputFile(parsed_path)
     await message.answer_document(parsed_file, caption="✅ Вот твой распаршенный файл")
 
